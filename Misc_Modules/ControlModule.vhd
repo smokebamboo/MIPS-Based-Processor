@@ -31,7 +31,6 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity ControlModule is
     Port ( Instr : in  STD_LOGIC_VECTOR (31 downto 0);
-			  PC_Sel : out STD_LOGIC;
 			  PC_LdEn : out STD_LOGIC;
 			  Immed_sel : out STD_LOGIC_VECTOR (1 downto 0);
 			  RF_WrEn : out STD_LOGIC;
@@ -41,9 +40,9 @@ entity ControlModule is
 			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
 			  Mem_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
+			  Branch : out STD_LOGIC;
 			  Branch_Eq : out STD_LOGIC;
 			  Branch_not_Eq : out STD_LOGIC);
-			  
 end ControlModule;
 
 architecture Behavioral of ControlModule is
@@ -87,9 +86,7 @@ begin
 				control_state <= error;
 		end case;
 	end process;
-	
-	PC_Sel <= '1' when ((control_state = b_op) OR (control_state = beq_op) OR (control_state = bne_op)) else '0';
-	
+		
 	PC_LdEn <= '1';
 	
 	Immed_sel <= "11" when (control_state = lui_op) else
@@ -116,6 +113,8 @@ begin
 	Mem_WrEn <= '1' when (control_state = sw_op) else '0';
 	
 	Byte_ExtrEn <= '1' when (control_state = lb_op) else '0';
+	
+	Branch <= '1' when (control_state = b_op) else '0';
 	
 	Branch_Eq <= '1' when (control_state = beq_op) else '0';
 	
