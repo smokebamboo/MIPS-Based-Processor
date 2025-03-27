@@ -40,7 +40,6 @@ entity ControlModule is
 			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
 			  Mem_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
-			  Branch : out STD_LOGIC;
 			  Branch_Eq : out STD_LOGIC;
 			  Branch_not_Eq : out STD_LOGIC);
 end ControlModule;
@@ -100,23 +99,21 @@ begin
 
 	RF_WrData_sel <= '1' when (control_state = lb_op) OR (control_state = lw_op) else '0';
 
-	RF_B_sel <= '1' when (control_state = beq_op) OR (control_state = bne_op) OR (control_state = sw_op);
+	RF_B_sel <= '1' when (control_state = beq_op) OR (control_state = bne_op) OR (control_state = sw_op) else '0';
 
 	ALU_Bin_sel <= '1' when (control_state = li_op) OR (control_state = lui_op) OR (control_state = addi_op) OR (control_state = andi_op) OR (control_state = ori_op) OR
 									(control_state = lb_op) OR (control_state = lw_op) OR (control_state = sw_op) else '0';
 
 	ALU_func <= func(3 downto 0) when (control_state = alu_op) else
 					opcode(3 downto 0) when (control_state = addi_op) OR (control_state = andi_op) OR (control_state = ori_op) else
-					"0001" when (control_state = beq_op) OR (control_state = bne_op) else
+					"0001" when (control_state = beq_op) OR (control_state = bne_op) OR (control_state = b_op) else
 					"0000";
 					
 	Mem_WrEn <= '1' when (control_state = sw_op) else '0';
 	
 	Byte_ExtrEn <= '1' when (control_state = lb_op) else '0';
-	
-	Branch <= '1' when (control_state = b_op) else '0';
-	
-	Branch_Eq <= '1' when (control_state = beq_op) else '0';
+		
+	Branch_Eq <= '1' when (control_state = beq_op) OR (control_state = b_op) else '0';
 	
 	Branch_not_Eq <= '1' when (control_state = bne_op) else '0';
 	

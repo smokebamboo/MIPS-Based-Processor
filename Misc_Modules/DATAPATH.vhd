@@ -44,7 +44,6 @@ entity DATAPATH is
 			  ALU_func : in STD_LOGIC_VECTOR (3 downto 0);
 			  Mem_WrEn : in STD_LOGIC;
 			  Byte_ExtrEn : in STD_LOGIC;
-			  Branch : in STD_LOGIC;
 			  Branch_Eq : in STD_LOGIC;
 			  Branch_not_Eq : in STD_LOGIC);
 end DATAPATH;
@@ -109,10 +108,10 @@ architecture Behavioral of DATAPATH is
 	signal alu_zero_signal : STD_LOGIC;
 	signal pc_sel : STD_LOGIC;
 begin
-	pc_sel <= (Branch) OR (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
+	pc_sel <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
 
 	if_stage : IFSTAGE port map(PC_Immed => immediate, PC_sel => pc_sel, PC_LdEn => PC_LdEn, RST => RST, CLK => CLK, Instr => instruction);
-	
+
 	Instr <= instruction;
 	
 	dec_stage : DECSTAGE port map(Instr => instruction, RF_WrEn => RF_WrEn, ALU_out => alu_output, MEM_out => mem_output, RF_WrData_sel => RF_WrData_sel,

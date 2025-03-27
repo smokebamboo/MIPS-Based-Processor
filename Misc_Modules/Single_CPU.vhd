@@ -48,7 +48,6 @@ architecture Behavioral of Single_CPU is
 			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
 			  Mem_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
-			  Branch : out STD_LOGIC;
 			  Branch_Eq : out STD_LOGIC;
 			  Branch_not_Eq : out STD_LOGIC);
 	end component;
@@ -68,7 +67,6 @@ architecture Behavioral of Single_CPU is
 			  ALU_func : in STD_LOGIC_VECTOR (3 downto 0);
 			  Mem_WrEn : in STD_LOGIC;
 			  Byte_ExtrEn : in STD_LOGIC;
-			  Branch : in STD_LOGIC;
 			  Branch_Eq : in STD_LOGIC;
 			  Branch_not_Eq : in STD_LOGIC);
 	end component;
@@ -83,17 +81,16 @@ architecture Behavioral of Single_CPU is
 	signal alu_function : STD_LOGIC_VECTOR (3 downto 0); -- Selects the function the ALU will perform
 	signal mem_write_enable : STD_LOGIC; -- Enables writing in the RAM
 	signal byte_extractor_enable : STD_LOGIC; -- Enables the extraction of bytes or lw operation
-	signal branch_sig : STD_LOGIC; -- Signal for the B operation
-	signal branch_eq_sig : STD_LOGIC; -- Signal for the beq operation
+	signal branch_eq_sig : STD_LOGIC; -- Signal for the beq and b operations
 	signal branch_not_eq_sig : STD_LOGIC; -- Signal for the bne operation
 begin
 	control : ControlModule port map(Instr => instruction, PC_LdEn => pc_load_enable, Immed_sel => immediate_sel,
 												RF_WrEn => rf_write_enable, RF_WrData_sel => rf_write_data_sel, RF_B_sel => rf_B_sel,
 												ALU_Bin_sel => alu_bin_sel, ALU_func => alu_function, Mem_WrEn => mem_write_enable,
-												Byte_ExtrEn => byte_extractor_enable, Branch => branch_sig, Branch_Eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig);
+												Byte_ExtrEn => byte_extractor_enable, Branch_Eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig);
 	
 	path : DATAPATH port map(Instr => instruction, Ovf => Ovf, Cout => Cout, CLK => CLK, RST => RST, PC_LdEn => pc_load_enable, Immed_sel => immediate_sel, RF_WrEn => rf_write_enable,
 									 RF_WrData_sel => rf_write_data_sel, RF_B_sel => rf_B_sel, ALU_Bin_sel => alu_bin_sel, ALU_func => alu_function, Mem_WrEn => mem_write_enable,
-									 Byte_ExtrEn => byte_extractor_enable, Branch => branch_sig, Branch_eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig);
+									 Byte_ExtrEn => byte_extractor_enable, Branch_eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig);
 end Behavioral;
 
