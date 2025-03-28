@@ -48,7 +48,7 @@ architecture Behavioral of ControlModule is
 
 	signal opcode : STD_LOGIC_VECTOR (5 downto 0);
 	signal func : STD_LOGIC_VECTOR (5 downto 0);
-	type state is (alu_op, li_op, lui_op, addi_op, andi_op, ori_op, b_op, beq_op, bne_op, lb_op, lw_op, sw_op, error);
+	type state is (alu_op, li_op, lui_op, addi_op, andi_op, ori_op, b_op, beq_op, bne_op, lb_op, lw_op, sw_op, NOP);
 	signal control_state : state;
 begin
 	opcode <= Instr(31 downto 26);
@@ -82,7 +82,7 @@ begin
 			when "011111" =>
 				control_state <= sw_op;
 			when others =>
-				control_state <= error;
+				control_state <= NOP;
 		end case;
 	end process;
 		
