@@ -34,7 +34,7 @@ USE ieee.std_logic_1164.ALL;
  
 ENTITY CPU_Test IS
 END CPU_Test;
- 
+
 ARCHITECTURE behavior OF CPU_Test IS 
  
     -- Component Declaration for the Unit Under Test (UUT)
