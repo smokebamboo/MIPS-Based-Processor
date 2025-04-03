@@ -99,7 +99,7 @@ begin
 
 	RF_WrData_sel <= '1' when (control_state = lb_op) OR (control_state = lw_op) else '0';
 
-	RF_B_sel <= '1' when (control_state = beq_op) OR (control_state = bne_op) OR (control_state = sw_op) else '0';
+	RF_B_sel <= '1' when (control_state = beq_op) OR (control_state = bne_op) OR (control_state = sw_op) OR (control_state = b_op) else '0';
 
 	ALU_Bin_sel <= '1' when (control_state = li_op) OR (control_state = lui_op) OR (control_state = addi_op) OR (control_state = andi_op) OR (control_state = ori_op) OR
 									(control_state = lb_op) OR (control_state = lw_op) OR (control_state = sw_op) else '0';
