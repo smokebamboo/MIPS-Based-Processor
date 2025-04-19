@@ -45,7 +45,14 @@ entity DATAPATH is
 			  Mem_WrEn : in STD_LOGIC;
 			  Byte_ExtrEn : in STD_LOGIC;
 			  Branch_Eq : in STD_LOGIC;
-			  Branch_not_Eq : in STD_LOGIC);
+			  Branch_not_Eq : in STD_LOGIC;
+			  InstrRegEn : in STD_LOGIC;
+			  RF_A_RegEn : in STD_LOGIC;
+			  RF_B_RegEn : in STD_LOGIC;
+			  ImmedRegEn : in STD_LOGIC;
+			  ALU_RegEn : in STD_LOGIC;
+			  ZeroRegEn : in STD_LOGIC;
+			  MemDataRegEn : in STD_LOGIC);
 end DATAPATH;
 
 architecture Behavioral of DATAPATH is
@@ -94,6 +101,23 @@ architecture Behavioral of DATAPATH is
            MEM_DataOut : out  STD_LOGIC_VECTOR (31 downto 0));
 	end component;
 	
+	component Rgster is
+    Port ( CLK : in  STD_LOGIC;
+			  RST : in STD_LOGIC;
+           WE : in  STD_LOGIC;
+           DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
+           DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
+	end component;
+	
+	component Register_1_Bit is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+           WE : in  STD_LOGIC;
+           DataIN : in  STD_LOGIC;
+           DataOUT : out  STD_LOGIC);
+	end component;
+
+
 	signal immediate : STD_LOGIC_VECTOR (31 downto 0); -- The immediate that's taken from the decoding stage in its correct format
 	
 	signal instruction : STD_LOGIC_VECTOR (31 downto 0); -- The instruction from the ROM, forwarded to the decoding stage and the Control
@@ -104,23 +128,43 @@ architecture Behavioral of DATAPATH is
 	
 	signal register_read_1 : STD_LOGIC_VECTOR (31 downto 0); -- The output No.1 of the decoding stage
 	signal register_read_2 : STD_LOGIC_VECTOR (31 downto 0); -- The output No.2 of the decoding stage
-	
+
 	signal alu_zero_signal : STD_LOGIC;
 	signal pc_sel : STD_LOGIC;
+	
+	signal instruction_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	signal register_read_1_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	signal register_read_2_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	signal immediate_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	signal alu_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	signal alu_zero_signal_to_reg : STD_LOGIC;
+	signal mem_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	
 begin
 	pc_sel <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
 
-	if_stage : IFSTAGE port map(PC_Immed => immediate, PC_sel => pc_sel, PC_LdEn => PC_LdEn, RST => RST, CLK => CLK, Instr => instruction);
+	if_stage : IFSTAGE port map(PC_Immed => immediate, PC_sel => pc_sel, PC_LdEn => PC_LdEn, RST => RST, CLK => CLK, Instr => instruction_to_reg);
 
 	Instr <= instruction;
 	
-	dec_stage : DECSTAGE port map(Instr => instruction, RF_WrEn => RF_WrEn, ALU_out => alu_output, MEM_out => mem_output, RF_WrData_sel => RF_WrData_sel,
-											RF_B_sel => RF_B_sel, Immed_sel => Immed_sel, CLK => CLK, RST => RST, Immed => immediate, RF_A => register_read_1, RF_B => register_read_2);
+	instruction_register : Rgster port map(CLK => CLK, RST => RST, WE => InstrRegEn, DataIN => instruction_to_reg, DataOUT => instruction);
 	
-	alu_stage : ALUSTAGE port map(RF_A => register_read_1, RF_B => register_read_2, Immed => immediate, ALU_Bin_sel => ALU_Bin_sel, ALU_func => ALU_func, ALU_out => alu_output,
-											Zero => alu_zero_signal, Cout => Cout, Ovf => Ovf);
-											
+	dec_stage : DECSTAGE port map(Instr => instruction, RF_WrEn => RF_WrEn, ALU_out => alu_output, MEM_out => mem_output, RF_WrData_sel => RF_WrData_sel,
+											RF_B_sel => RF_B_sel, Immed_sel => Immed_sel, CLK => CLK, RST => RST, Immed => immediate_to_reg, RF_A => register_read_1_to_reg, RF_B => register_read_2_to_reg);
+	
+	rf_A_register : Rgster port map(CLK => CLK, RST => RST, WE => RF_A_RegEn, DataIN => register_read_1_to_reg, DataOUT => register_read_1);
+	rf_B_register : Rgster port map(CLK => CLK, RST => RST, WE => RF_B_RegEn, DataIN => register_read_2_to_reg, DataOUT => register_read_2);
+	immediate_register : Rgster port map(CLK => CLK, RST => RST, WE => ImmedRegEn, DataIN => immediate_to_reg, DataOUT => immediate);
+	
+	alu_stage : ALUSTAGE port map(RF_A => register_read_1, RF_B => register_read_2, Immed => immediate, ALU_Bin_sel => ALU_Bin_sel, ALU_func => ALU_func, ALU_out => alu_output_to_reg,
+											Zero => alu_zero_signal_to_reg, Cout => Cout, Ovf => Ovf);
+	
+	alu_out_register : Rgster port map(CLK => CLK, RST => RST, WE => ALU_RegEn, DataIN => alu_output_to_reg, DataOUT => alu_output);
+	zero_register : Register_1_Bit port map(CLK => CLK, RST => RST, WE => ZeroRegEn, DataIN => alu_zero_signal_to_reg, DataOUT => alu_zero_signal);
+	
 	mem_stage : MEMSTAGE port map(CLK => CLK, Mem_WrEn => Mem_WrEn, ALU_MEM_Addr => alu_output, Byte_ExtrEn => Byte_ExtrEn,
-										  MEM_DataIn => register_read_2, MEM_DataOut => mem_output);
+										  MEM_DataIn => register_read_2, MEM_DataOut => mem_output_to_reg);
+										  
+	mem_data_register : Rgster port map(CLK => CLK, RST => RST, WE => MemDataRegEn, DataIN => mem_output_to_reg, DataOUT => mem_output);
 end Behavioral;
 
