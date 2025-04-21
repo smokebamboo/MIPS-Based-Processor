@@ -51,7 +51,7 @@ entity DATAPATH is
 			  RF_B_RegEn : in STD_LOGIC;
 			  ImmedRegEn : in STD_LOGIC;
 			  ALU_RegEn : in STD_LOGIC;
-			  ZeroRegEn : in STD_LOGIC;
+			  PC_SelRegEn : in STD_LOGIC;
 			  MemDataRegEn : in STD_LOGIC);
 end DATAPATH;
 
@@ -137,11 +137,13 @@ architecture Behavioral of DATAPATH is
 	signal register_read_2_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	signal immediate_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	signal alu_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal alu_zero_signal_to_reg : STD_LOGIC;
+	signal pc_sel_to_reg : STD_LOGIC;
 	signal mem_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	
 begin
-	pc_sel <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
+	pc_sel_to_reg <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
+
+	pc_sel_register : Register_1_Bit port map(CLK => CLK, RST => RST, WE => PC_SelRegEn, DataIN => pc_sel_to_reg, DataOUT => pc_sel);
 
 	if_stage : IFSTAGE port map(PC_Immed => immediate, PC_sel => pc_sel, PC_LdEn => PC_LdEn, RST => RST, CLK => CLK, Instr => instruction_to_reg);
 
@@ -157,10 +159,9 @@ begin
 	immediate_register : Rgster port map(CLK => CLK, RST => RST, WE => ImmedRegEn, DataIN => immediate_to_reg, DataOUT => immediate);
 	
 	alu_stage : ALUSTAGE port map(RF_A => register_read_1, RF_B => register_read_2, Immed => immediate, ALU_Bin_sel => ALU_Bin_sel, ALU_func => ALU_func, ALU_out => alu_output_to_reg,
-											Zero => alu_zero_signal_to_reg, Cout => Cout, Ovf => Ovf);
+											Zero => alu_zero_signal, Cout => Cout, Ovf => Ovf);
 	
 	alu_out_register : Rgster port map(CLK => CLK, RST => RST, WE => ALU_RegEn, DataIN => alu_output_to_reg, DataOUT => alu_output);
-	zero_register : Register_1_Bit port map(CLK => CLK, RST => RST, WE => ZeroRegEn, DataIN => alu_zero_signal_to_reg, DataOUT => alu_zero_signal);
 	
 	mem_stage : MEMSTAGE port map(CLK => CLK, Mem_WrEn => Mem_WrEn, ALU_MEM_Addr => alu_output, Byte_ExtrEn => Byte_ExtrEn,
 										  MEM_DataIn => register_read_2, MEM_DataOut => mem_output_to_reg);

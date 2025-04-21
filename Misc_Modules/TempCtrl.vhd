@@ -4,7 +4,7 @@
 -- 
 -- Create Date:    22:14:36 04/19/2025 
 -- Design Name: 
--- Module Name:    ControlModule - Behavioral 
+-- Module Name:    TempCtrl - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -29,7 +29,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity ControlModule is
+entity TempCtrl is
     Port ( CLK : in STD_LOGIC;
 			  RST : in STD_LOGIC;
 			  Instr : in  STD_LOGIC_VECTOR (31 downto 0);
@@ -51,10 +51,10 @@ entity ControlModule is
 			  ALU_RegEn : out STD_LOGIC;
 			  PC_SelRegEn : out STD_LOGIC;
 			  MemDataRegEn : out STD_LOGIC);
-end ControlModule;
+end TempCtrl;
 
-architecture Behavioral of ControlModule is
-	type cycle_type is (reset, fetch, branch, branchNE, dec, branch_dec, r_exec, i_exec, memread, memwrite, alu_writeback, mem_writeback);
+architecture Behavioral of TempCtrl is
+	type cycle_type is (fetch, branch, branchNE, dec, branch_dec, r_exec, i_exec, memread, memwrite, alu_writeback, mem_writeback);
 	signal cycle_state : cycle_type;
 	
 	signal opcode : STD_LOGIC_VECTOR (5 downto 0);
@@ -105,62 +105,40 @@ begin
 		wait until rising_edge(CLK);
 		if RST = '1' then
 			cycle_state <= fetch;
-		else
-			case cycle_state is
-				when reset =>
-					if instr_state = b_op or instr_state = beq_op or instr_state = bne_op or instr_state = sw_op then
-						cycle_state <= branch_dec;
-					else
-						cycle_state <= dec;
-					end if;
-				when fetch =>
-					if instr_state = b_op or instr_state = beq_op or instr_state = bne_op or instr_state = sw_op then
-						cycle_state <= branch_dec;
-					else
-						cycle_state <= dec;
-					end if;
-				when branch_dec =>
-					if instr_state = sw_op then
-						cycle_state <= i_exec;
-					elsif instr_state = bne_op then
-						cycle_state <= branchNE;
-					else
-						cycle_state <= branch;
-					end if;
-				when dec =>
-					if instr_state = NOP then
-						cycle_state <= fetch;
-					elsif instr_state = li_op or instr_state = lui_op or instr_state = andi_op or instr_state = ori_op then
-						cycle_state <= i_exec;
-					else
-						cycle_state <= r_exec;
-					end if;
-				when r_exec =>
-					cycle_state <= alu_writeback;
-				when i_exec =>
-					if instr_state = lw_op or instr_state = lb_op then
-						cycle_state <= memread;
-					elsif instr_state = sw_op then
-						cycle_state <= memwrite;
-					else
-						cycle_state <= alu_writeback;
-					end if;
-				when branch =>
-					cycle_state <= fetch;
-				when branchNE =>
-					cycle_state <= fetch;
-				when memread =>
-					cycle_state <= mem_writeback;
-				when memwrite =>
-					cycle_state <= fetch;
-				when alu_writeback =>
-					cycle_state <= fetch;
-				when mem_writeback =>
-					cycle_state <= fetch;
-			end case;
 		end if;
 		
-		
+		case cycle_state is
+			when fetch =>
+				cycle_state <= fetch when (instr_state = NOP) else
+									branch_dec when (instr_state = b_op) OR (instr_state = beq_op) OR (instr_state = bne_op) OR (instr_state = sw_op) else
+									dec;
+			when branch_dec =>
+				cycle_state <= i_exec when (instr_state = sw_op) else
+									branchNE when (instr_state = bne) else
+									branch;
+			when dec =>
+				cycle_state <= i_exec when (instr_state = li_op) OR (instr_state = lui_op) OR (instr_state = andi_op) OR
+													(instr_state = ori_op) else
+									r_exec;
+			when r_exec =>
+				cycle_state <= alu_writeback;
+			when i_exec =>
+				cycle_state <= memread when (instr_state = lw_op) OR (instr_state = lb_op) else
+									memwrite when (isntr_state = sw_op) else
+									alu_writeback;
+			when branch =>
+				cycle_state <= fetch;
+			when branchNE =>
+				cycle_state <= fetch;
+			when memread =>
+				cycle_state <= mem_writeback;
+			when memwrite =>
+				cycle_state <= fetch;
+			when alu_writeback =>
+				cycle_state <= fetch;
+			when mem_writeback =>
+				cycle_state <= fetch;
+		end case;
 	end process;
 	
 	PC_LdEn <= '1' when (cycle_state = fetch) else '0';
@@ -178,9 +156,9 @@ begin
 	
 	ALU_Bin_sel <= '1' when (cycle_state = i_exec) else '0';
 	
-	ALU_func <= func(3 downto 0) when (instr_state = alu_op) else
-					opcode(3 downto 0) when (instr_state = addi_op) OR (instr_state = andi_op) OR (instr_state = ori_op) else
-					"0001" when (instr_state = beq_op) OR (instr_state = bne_op) OR (instr_state = b_op) else
+	ALU_func <= func(3 downto 0) when (cycle_state = alu_op) else
+					opcode(3 downto 0) when (cycle_state = addi_op) OR (cycle_state = andi_op) OR (cycle_state = ori_op) else
+					"0001" when (cycle_state = beq_op) OR (cycle_state = bne_op) OR (cycle_state = b_op) else
 					"0000";
 					
 	Mem_WrEn <= '1' when (cycle_state = memwrite) else '0';
@@ -191,7 +169,7 @@ begin
 	
 	Branch_not_Eq <= '1' when (cycle_state = branchNE) else '0';
 	
-	InstrRegEn <= '1' when (cycle_state = fetch) OR (cycle_state = reset) else '0';
+	InstrRegEn <= '1' when (cycle_state = fetch) else '0';
 	
 	RF_A_RegEn <= '1' when (cycle_state = dec) OR (cycle_state = branch_dec) else '0';
 	
@@ -205,3 +183,4 @@ begin
 	
 	MemDataRegEn <= '1' when (cycle_state = memwrite) else '0';
 end Behavioral;
+
