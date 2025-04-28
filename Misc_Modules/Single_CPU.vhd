@@ -57,7 +57,6 @@ architecture Behavioral of Single_CPU is
 			  RF_B_RegEn : out STD_LOGIC;
 			  ImmedRegEn : out STD_LOGIC;
 			  ALU_RegEn : out STD_LOGIC;
-			  PC_SelRegEn : out STD_LOGIC;
 			  MemDataRegEn : out STD_LOGIC);
 	end component;
 	
@@ -83,7 +82,6 @@ architecture Behavioral of Single_CPU is
 			  RF_B_RegEn : in STD_LOGIC;
 			  ImmedRegEn : in STD_LOGIC;
 			  ALU_RegEn : in STD_LOGIC;
-			  PC_SelRegEn : in STD_LOGIC;
 			  MemDataRegEn : in STD_LOGIC);
 	end component;
 	
@@ -104,7 +102,7 @@ architecture Behavioral of Single_CPU is
 	signal RF_B_RegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the output B of the DECSTAGE
 	signal ImmedRegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the immediate from the DECSTAGE
 	signal ALU_RegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the output data of the ALU
-	signal PC_SelRegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the value of PC_Sel
+	--signal PC_SelRegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the value of PC_Sel
 	signal MemDataRegEn_sig : STD_LOGIC; -- Signal controlling the register that holds the output data of MEMSTAGE
 	
 begin
@@ -113,14 +111,14 @@ begin
 												ALU_Bin_sel => alu_bin_sel, ALU_func => alu_function, Mem_WrEn => mem_write_enable,
 												Byte_ExtrEn => byte_extractor_enable, Branch_Eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig,
 												InstrRegEn => InstrRegEn_sig, RF_A_RegEn => RF_A_RegEn_sig, RF_B_RegEn => RF_B_RegEn_sig,
-												ImmedRegEn => ImmedRegEn_sig, ALU_RegEn => ALU_RegEn_sig, PC_SelRegEn => PC_SelRegEn_sig,
+												ImmedRegEn => ImmedRegEn_sig, ALU_RegEn => ALU_RegEn_sig,
 												MemDataRegEn => MemDataRegEn_sig);
 	
 	path : DATAPATH port map(Instr => instruction, Ovf => Ovf, Cout => Cout, CLK => CLK, RST => RST, PC_LdEn => pc_load_enable, Immed_sel => immediate_sel, RF_WrEn => rf_write_enable,
 									 RF_WrData_sel => rf_write_data_sel, RF_B_sel => rf_B_sel, ALU_Bin_sel => alu_bin_sel, ALU_func => alu_function, Mem_WrEn => mem_write_enable,
 									 Byte_ExtrEn => byte_extractor_enable, Branch_eq => branch_eq_sig, Branch_not_Eq => branch_not_eq_sig,
 									 InstrRegEn => InstrRegEn_sig, RF_A_RegEn => RF_A_RegEn_sig, RF_B_RegEn => RF_B_RegEn_sig,
-									 ImmedRegEn => ImmedRegEn_sig, ALU_RegEn => ALU_RegEn_sig, PC_SelRegEn => PC_SelRegEn_sig,
+									 ImmedRegEn => ImmedRegEn_sig, ALU_RegEn => ALU_RegEn_sig,
 									 MemDataRegEn => MemDataRegEn_sig);
 end Behavioral;
 

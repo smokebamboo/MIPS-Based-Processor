@@ -49,7 +49,6 @@ entity ControlModule is
 			  RF_B_RegEn : out STD_LOGIC;
 			  ImmedRegEn : out STD_LOGIC;
 			  ALU_RegEn : out STD_LOGIC;
-			  PC_SelRegEn : out STD_LOGIC;
 			  MemDataRegEn : out STD_LOGIC);
 end ControlModule;
 
@@ -111,7 +110,7 @@ begin
 					cycle_state <= dec;
 				when dec =>
 					if instr_state = NOP then
-						cycle_state <= fetch;
+						cycle_state <= alu_writeback;
 					elsif instr_state = li_op or instr_state = lui_op or instr_state = addi_op or instr_state = andi_op or instr_state = ori_op or
 											  instr_state = sw_op or instr_state = lw_op or instr_state = lb_op then
 						cycle_state <= i_exec;
@@ -154,7 +153,7 @@ begin
 		
 	end process;
 	
-	PC_LdEn <= '1' when (cycle_state = fetch) else '0';
+	PC_LdEn <= '1' when (cycle_state = memwrite) or (cycle_state = branch) or (cycle_state = branchNE) or (cycle_state = alu_writeback) or (cycle_state = mem_writeback) else '0';
 	
 	Immed_sel <= "11" when (instr_state = lui_op) else
 					 "10" when (instr_state = andi_op) OR (instr_state = ori_op) else
@@ -191,9 +190,6 @@ begin
 	ImmedRegEn <= '1' when (cycle_state = dec) else '0';
 	
 	ALU_RegEn <= '1' when (cycle_state = r_exec) OR (cycle_state = i_exec) else '0';
-	
---	PC_SelRegEn <= '1' when (cycle_state = branch) OR (cycle_state = branchNE) else '0';
-	PC_SelRegEn <= '1';
 	
 	MemDataRegEn <= '1' when (cycle_state = memread) OR (cycle_state = memreadbyte) else '0';
 end Behavioral;

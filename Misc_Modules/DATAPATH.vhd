@@ -51,7 +51,6 @@ entity DATAPATH is
 			  RF_B_RegEn : in STD_LOGIC;
 			  ImmedRegEn : in STD_LOGIC;
 			  ALU_RegEn : in STD_LOGIC;
-			  PC_SelRegEn : in STD_LOGIC;
 			  MemDataRegEn : in STD_LOGIC);
 end DATAPATH;
 
@@ -108,15 +107,6 @@ architecture Behavioral of DATAPATH is
            DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
            DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
 	end component;
-	
-	component Register_1_Bit is
-    Port ( CLK : in  STD_LOGIC;
-           RST : in  STD_LOGIC;
-           WE : in  STD_LOGIC;
-           DataIN : in  STD_LOGIC;
-           DataOUT : out  STD_LOGIC);
-	end component;
-
 
 	signal immediate : STD_LOGIC_VECTOR (31 downto 0); -- The immediate that's taken from the decoding stage in its correct format
 	
@@ -137,13 +127,10 @@ architecture Behavioral of DATAPATH is
 	signal register_read_2_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	signal immediate_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	signal alu_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal pc_sel_to_reg : STD_LOGIC;
 	signal mem_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
 	
 begin
-	pc_sel_to_reg <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
-
-	pc_sel_register : Register_1_Bit port map(CLK => CLK, RST => RST, WE => PC_SelRegEn, DataIN => pc_sel_to_reg, DataOUT => pc_sel);
+	pc_sel <= (Branch_Eq AND alu_zero_signal) OR (Branch_not_Eq AND (NOT alu_zero_signal));
 
 	if_stage : IFSTAGE port map(PC_Immed => immediate, PC_sel => pc_sel, PC_LdEn => PC_LdEn, RST => RST, CLK => CLK, Instr => instruction_to_reg);
 
