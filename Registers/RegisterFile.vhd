@@ -98,15 +98,24 @@ architecture Behavioral of RegisterFile is
 	--signal MuxOUT_WrEn2 : STD_LOGIC;
 begin
 	
-	Wr_Decoder : Decoder_5_32 port map (DecodeIN => Awr, DecodeOUT => decoder_output);
+	Wr_Decoder : Decoder_5_32 port map (DecodeIN => Awr, 
+													DecodeOUT => decoder_output);
 	
 	genWr: for i in 0 to 31 generate
 		reg_wr_enabled(i) <= decoder_output(i) AND WrEn;
 	end generate;
 	
-	Regstr : Rgster port map (CLK => CLK, RST => RST, WE => '0', DataIN => Din, DataOUT => reg_data(0));
+	Regstr : Rgster port map (CLK => CLK, 
+									  RST => RST, 
+									  WE => '0', 
+									  DataIN => Din, 
+									  DataOUT => reg_data(0));
 	genRegs: for i in 1 to 31 generate
-		Regstr : Rgster port map (CLK => CLK, RST => RST, WE => reg_wr_enabled(i), DataIN => Din, DataOUT => reg_data(i));
+		Regstr : Rgster port map (CLK => CLK, 
+										  RST => RST, 
+										  WE => reg_wr_enabled(i), 
+										  DataIN => Din, 
+										  DataOUT => reg_data(i));
 	end generate;
 	
 	ReadMUX1 : MUX_32_to_1 port map (Ard1, reg_data(0), reg_data(1), reg_data(2), reg_data(3), reg_data(4), reg_data(5), reg_data(6), reg_data(7), reg_data(8), reg_data(9),

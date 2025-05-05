@@ -76,15 +76,26 @@ architecture Behavioral of IFSTAGE is
 	signal PC_DataIn : STD_LOGIC_VECTOR(31 downto 0); -- The new PC value
 	signal Instr_Addr : STD_LOGIC_VECTOR(31 downto 0); -- The PC value which also shows which address the instruction is located in
 begin
-	PC_MUX : MUX_2_to_1 port map (In0 => PC_Incr, In1 => PC_Incr_Immed, En => PC_Sel, Dout => PC_DataIn);
+	PC_MUX : MUX_2_to_1 port map (In0 => PC_Incr, 
+											In1 => PC_Incr_Immed, 
+											En => PC_Sel, 
+											Dout => PC_DataIn);
 	
-	PC : Rgster port map (CLK => CLK, RST => RST, WE => PC_LdEn, DataIN => PC_DataIn, DataOUT => Instr_Addr);
+	PC : Rgster port map (CLK => CLK, 
+								 RST => RST, 
+								 WE => PC_LdEn, 
+								 DataIN => PC_DataIn, 
+								 DataOUT => Instr_Addr);
 	
-	PC_Incrementor : Adder_32_bit port map (Input => Instr_Addr, Output => PC_Incr);
+	PC_Incrementor : Adder_32_bit port map (Input => Instr_Addr, 
+														 Output => PC_Incr);
 	
-	Immediate_Adder : Adder_Immediate port map (Input => PC_Incr, Immediate => PC_Immed, Output => PC_Incr_Immed);
+	Immediate_Adder : Adder_Immediate port map (Input => PC_Incr, 
+															  Immediate => PC_Immed, 
+															  Output => PC_Incr_Immed);
 	
-	Instruction_Memory : InstructionMemory port map (a => Instr_Addr(11 downto 2), spo => Instr);
+	Instruction_Memory : InstructionMemory port map (a => Instr_Addr(11 downto 2), 
+																	 spo => Instr);
 
 end Behavioral;
 

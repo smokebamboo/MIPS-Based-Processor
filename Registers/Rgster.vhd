@@ -43,10 +43,13 @@ begin
 	process
 	begin
 		wait until rising_edge(CLK);
+		
 		if (RST = '1') then
 			DataOUT <= (others => '0');
+			
 		elsif (WE = '1') then
 			DataOUT <= DataIN;
+			
 		end if;
 	end process;
 

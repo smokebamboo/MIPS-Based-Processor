@@ -32,8 +32,8 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity Adder_32_bit is
-    Port ( Input : in  STD_LOGIC_VECTOR (31 downto 0);
-           Output : out  STD_LOGIC_VECTOR (31 downto 0));
+    Port( Input : in  STD_LOGIC_VECTOR (31 downto 0);
+          Output : out  STD_LOGIC_VECTOR (31 downto 0));
 end Adder_32_bit;
 
 architecture Behavioral of Adder_32_bit is

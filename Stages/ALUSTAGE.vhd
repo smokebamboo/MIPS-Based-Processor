@@ -62,8 +62,17 @@ architecture Behavioral of ALUSTAGE is
 	
 	signal B : STD_LOGIC_VECTOR (31 downto 0);
 begin
-	ALU_MUX : MUX_2_to_1 port map(In0 => RF_B, In1 => Immed, En => ALU_Bin_sel, Dout => B);
+	ALU_MUX : MUX_2_to_1 port map(In0 => RF_B, 
+											In1 => Immed, 
+											En => ALU_Bin_sel, 
+											Dout => B);
 	
-	OP_ALU : ALU port map(A => RF_A, B => B, Op => ALU_func, Output => ALU_out, Zero => Zero, Cout => Cout, Ovf => Ovf);
+	OP_ALU : ALU port map(A => RF_A, 
+								 B => B, 
+								 Op => ALU_func, 
+								 Output => ALU_out, 
+								 Zero => Zero, 
+								 Cout => Cout, 
+								 Ovf => Ovf);
 end Behavioral;
 

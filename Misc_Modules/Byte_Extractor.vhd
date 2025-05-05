@@ -42,8 +42,8 @@ begin
 
 	Output <= (zero_vector & WordIn(7 downto 0)) when Sel = "00" else
 				 (zero_vector & WordIn(15 downto 8)) when Sel = "01" else
-				 (zero_vector & WordIn(23 downto 16)) when Sel = "10" else
-				 (zero_vector & WordIn(31 downto 24)) when Sel = "11";
+			    (zero_vector & WordIn(23 downto 16)) when Sel = "10" else
+			    (zero_vector & WordIn(31 downto 24)) when Sel = "11";
 
 end Behavioral;
 

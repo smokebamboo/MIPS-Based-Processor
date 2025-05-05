@@ -59,40 +59,54 @@ begin
 				result := ext_result(31 downto 0);
 				Cout <= ext_result(32);
 				Ovf <= (A(31) XNOR B(31)) AND (A(31) XOR ext_result(31));
+
 			when ("0001") =>
 				ext_result := '0' & (A - B);
+				
 				if (A < B) then
 					Cout <= '1';
 				end if;
 				
 				result := ext_result(31 downto 0);
 				Ovf <= (A(31) XOR B(31)) AND (A(31) XOR ext_result(31));
+
 			when ("0010") =>
 				result := A AND B;
+
 			when ("0011") =>
 				result := A OR B;
+
 			when ("0100") =>
 				result := NOT A;
+
 			when ("1000") =>
 				result := std_logic_vector(shift_right(signed(A), 1));
+
 			when ("1001") =>
 				result := std_logic_vector(shift_right(unsigned(A), 1));
+
 			when ("1010") =>
 				result := std_logic_vector(shift_left(unsigned(A), 1));
+
 			when ("1100") =>
 				result := std_logic_vector(rotate_left(unsigned(A), 1));
+
 			when ("1101") =>
 				result := std_logic_vector(rotate_right(unsigned(A), 1));
+
 			when others =>
 		end case;
 		
 		if (result = "00000000000000000000000000000000") then
 			Zero <= '1';
+
 		else
 			Zero <= '0';
+
 		end if;
 		
 		Output <= result;
+		
 	end process;
 end Behavioral;
 

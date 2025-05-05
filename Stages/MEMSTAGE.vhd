@@ -66,11 +66,20 @@ architecture Behavioral of MEMSTAGE is
 	signal extr_byte : STD_LOGIC_VECTOR (31 downto 0); -- The byte from the extractor
 
 begin
-	Mem : MEMSTAGE_MEM port map (a => ALU_MEM_Addr(11 downto 2), d => MEM_DataIn, clk => CLK, we => Mem_WrEn, spo => mem_word);
+	Mem : MEMSTAGE_MEM port map (a => ALU_MEM_Addr(11 downto 2), 
+										  d => MEM_DataIn, 
+										  clk => CLK, 
+										  we => Mem_WrEn, 
+										  spo => mem_word);
 	
-	Extractor : Byte_Extractor port map (Sel => ALU_MEM_Addr(1 downto 0), WordIn => mem_word, Output => extr_byte);
+	Extractor : Byte_Extractor port map (Sel => ALU_MEM_Addr(1 downto 0), 
+													 WordIn => mem_word, 
+													 Output => extr_byte);
 	
-	Byte_Mux : MUX_2_to_1 port map(In0 => mem_word, In1 => extr_byte, En => Byte_ExtrEn, Dout => MEM_DataOut);
+	Byte_Mux : MUX_2_to_1 port map(In0 => mem_word, 
+											 In1 => extr_byte, 
+											 En => Byte_ExtrEn, 
+											 Dout => MEM_DataOut);
 
 end Behavioral;
 

@@ -81,12 +81,28 @@ architecture Behavioral of DECSTAGE is
 	signal Ard2 : STD_LOGIC_VECTOR (4 downto 0);
 	signal Din : STD_LOGIC_VECTOR (31 downto 0);
 begin
-	Reg_MUX : MUX_2_to_1_5bit port map (In0 => Instr(15 downto 11), In1 => Instr(20 downto 16), Sel => RF_B_sel, Dout => Ard2);
+	Reg_MUX : MUX_2_to_1_5bit port map (In0 => Instr(15 downto 11), 
+													In1 => Instr(20 downto 16), 
+													Sel => RF_B_sel, 
+													Dout => Ard2);
 	
-	Data_Write_MUX : MUX_2_to_1 port map (In0 => ALU_out, In1 => MEM_out, En => RF_WrData_sel, Dout => Din);
+	Data_Write_MUX : MUX_2_to_1 port map (In0 => ALU_out, 
+													  In1 => MEM_out, 
+													  En => RF_WrData_sel, 
+													  Dout => Din);
 	
-	RF : RegisterFile port map (CLK => CLK, RST => RST, Ard1 => Instr(25 downto 21), Ard2 => Ard2, WrEn => RF_WrEn, Awr => Instr(20 downto 16), Din => Din, Dout1 => RF_A, Dout2 => RF_B);
+	RF : RegisterFile port map (CLK => CLK, 
+										 RST => RST, 
+										 Ard1 => Instr(25 downto 21), 
+										 Ard2 => Ard2, 
+										 WrEn => RF_WrEn, 
+										 Awr => Instr(20 downto 16), 
+										 Din => Din, 
+										 Dout1 => RF_A, 
+										 Dout2 => RF_B);
 	
-	Immediate_Handler : ImmedHandler port map (Sel => Immed_sel, ImmedIn => Instr(15 downto 0), ImmedOut => Immed);
+	Immediate_Handler : ImmedHandler port map (Sel => Immed_sel, 
+															 ImmedIn => Instr(15 downto 0), 
+															 ImmedOut => Immed);
 end Behavioral;
 
