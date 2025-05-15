@@ -127,14 +127,14 @@ begin
 					if instr_state = NOP then
 						cycle_state <= alu_writeback;
 
-					elsif instr_state = (li_op or 
+					elsif instr_state = li_op or 
 							instr_state = lui_op or 
 							instr_state = addi_op or 
 							instr_state = andi_op or 
 							instr_state = ori_op or
 							instr_state = sw_op or 
 							instr_state = lw_op or 
-							instr_state = lb_op) then
+							instr_state = lb_op then
 						cycle_state <= i_exec;
 
 					elsif instr_state = bne_op then
