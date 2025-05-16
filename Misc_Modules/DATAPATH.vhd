@@ -37,21 +37,12 @@ entity DATAPATH is
 			  RST : in STD_LOGIC;
 			  PC_LdEn : in STD_LOGIC;
 			  Immed_sel : in STD_LOGIC_VECTOR (1 downto 0);
-			  RF_WrEn : in STD_LOGIC;
-			  RF_WrData_sel : in STD_LOGIC;
 			  RF_B_sel : in STD_LOGIC;
-			  ALU_Bin_sel : in STD_LOGIC;
-			  ALU_func : in STD_LOGIC_VECTOR (3 downto 0);
-			  Mem_WrEn : in STD_LOGIC;
-			  Byte_ExtrEn : in STD_LOGIC;
 			  Branch_Eq : in STD_LOGIC;
 			  Branch_not_Eq : in STD_LOGIC;
-			  InstrRegEn : in STD_LOGIC;
-			  RF_A_RegEn : in STD_LOGIC;
-			  RF_B_RegEn : in STD_LOGIC;
-			  ImmedRegEn : in STD_LOGIC;
-			  ALU_RegEn : in STD_LOGIC;
-			  MemDataRegEn : in STD_LOGIC);
+			  EX_Control : in STD_LOGIC_VECTOR (31 downto 0);
+			  M_Control : in STD_LOGIC_VECTOR (31 downto 0);
+			  WB_Control : in STD_LOGIC_VECTOR (31 downto 0));
 end DATAPATH;
 
 architecture Behavioral of DATAPATH is
@@ -107,27 +98,64 @@ architecture Behavioral of DATAPATH is
             DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
             DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
 	end component;
-
-	signal immediate : STD_LOGIC_VECTOR (31 downto 0); -- The immediate that's taken from the decoding stage in its correct format
 	
+	component IDEX_Cluster is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+			  WB_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
+			  M_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
+			  EX_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
+			  RF_A_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  Immediate_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  M_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  ALU_Bin_Sel : out STD_LOGIC;
+			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
+			  RF_A_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0)
+			  );
+	end component;
+	
+	component EXMEM_Cluster is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+			  WB_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
+			  M_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
+			  ALU_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  MEM_WrEn : out STD_LOGIC;
+			  Byte_ExtrEn : out STD_LOGIC;
+			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0)
+			  );
+	end component;
+	
+	component MEMWB_Cluster is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+			  WB_ControlIn : in STD_LOGIC_VECTOR(31 downto 0);
+			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
+			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
+           RF_Wr_DataSel : out  STD_LOGIC;
+			  RF_WrEn : out STD_LOGIC;
+			  Mem_Data : out STD_LOGIC_VECTOR(31 downto 0);
+			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0)
+			  );
+	end component;
+
 	signal instruction : STD_LOGIC_VECTOR (31 downto 0); -- The instruction from the ROM, forwarded to the decoding stage and the Control
 	
-	signal alu_output : STD_LOGIC_VECTOR (31 downto 0); -- The output of the alu stage
-	
-	signal mem_output : STD_LOGIC_VECTOR (31 downto 0); -- The output of the memory stage
-	
-	signal register_read_1 : STD_LOGIC_VECTOR (31 downto 0); -- The output No.1 of the decoding stage
-	signal register_read_2 : STD_LOGIC_VECTOR (31 downto 0); -- The output No.2 of the decoding stage
-
 	signal alu_zero_signal : STD_LOGIC;
 	signal pc_sel : STD_LOGIC;
 	
 	signal instruction_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal register_read_1_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal register_read_2_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal immediate_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal alu_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
-	signal mem_output_to_reg : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal WB_Control_to_exmem : STD_LOGIC_VECTOR (31 downto 0);
+	signal M_Control_to_exmem : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal ALU_Bin_sel : STD_LOGIC;
+	signal ALU_func : STD_LOGIC;
 	
 begin
 	pc_sel <= (Branch_Eq AND alu_zero_signal) OR 
@@ -149,61 +177,70 @@ begin
 														DataOUT => instruction);
 	
 	dec_stage : DECSTAGE port map(Instr => instruction, 
-											RF_WrEn => RF_WrEn, 
-											ALU_out => alu_output, 
-											MEM_out => mem_output, 
-											RF_WrData_sel => RF_WrData_sel,
+											RF_WrEn => , 
+											ALU_out => , 
+											MEM_out => , 
+											RF_WrData_sel => ,
 											RF_B_sel => RF_B_sel, 
 											Immed_sel => Immed_sel, 
 											CLK => CLK, 
 											RST => RST, 
-											Immed => immediate_to_reg, 
-											RF_A => register_read_1_to_reg, 
-											RF_B => register_read_2_to_reg);
+											Immed => immed_to_cluster, 
+											RF_A => rf_a_to_cluster, 
+											RF_B => rf_b_to_cluster);
+											
+	id_ex : IDEX_Cluster port map(CLK => CLK,
+											RST => RST,
+											WB_ControlIn => WB_Control,
+											M_ControlIn => M_Control,
+											EX_ControlIn => EX_Control,
+											RF_A_Data_Input => rf_a_to_cluster,
+											RF_B_Data_Input => rf_b_to_cluster,
+											Immediate_Data_Input => immed_to_cluster,
+											WB_ControlOut => WB_Control_to_exmem,
+											M_ControlOut => M_Control_to_exmem,
+											ALU_Bin_Sel => ALU_Bin_Sel,
+											ALU_func => ALU_func,
+											RF_A_DataOut => ,
+											RF_B_DataOut => ,
+											Immediate_DataOut => 
+											);
 	
-	rf_A_register : Rgster port map(CLK => CLK, 
-											  RST => RST, 
-											  WE => RF_A_RegEn, 
-											  DataIN => register_read_1_to_reg, 
-											  DataOUT => register_read_1);
-	rf_B_register : Rgster port map(CLK => CLK, 
-											  RST => RST, 
-											  WE => RF_B_RegEn, 
-											  DataIN => register_read_2_to_reg, 
-											  DataOUT => register_read_2);
-	immediate_register : Rgster port map(CLK => CLK, 
-													 RST => RST, 
-													 WE => ImmedRegEn, 
-													 DataIN => immediate_to_reg, 
-													 DataOUT => immediate);
-	
-	alu_stage : ALUSTAGE port map(RF_A => register_read_1, 
-											RF_B => register_read_2, 
-											Immed => immediate, 
-											ALU_Bin_sel => ALU_Bin_sel, 
+	alu_stage : ALUSTAGE port map(RF_A => , 
+											RF_B => , 
+											Immed => , 
+											ALU_Bin_sel => ALU_Bin_Sel, 
 											ALU_func => ALU_func, 
-											ALU_out => alu_output_to_reg,
+											ALU_out => ,
 											Zero => alu_zero_signal, 
 											Cout => Cout, 
 											Ovf => Ovf);
-	
-	alu_out_register : Rgster port map(CLK => CLK, 
-												  RST => RST, 
-												  WE => ALU_RegEn, 
-												  DataIN => alu_output_to_reg, 
-												  DataOUT => alu_output);
-	
+											
+	ex_mem : EXMEM_Cluster port map(CLK => CLK,
+											  RST => RST,
+											  WB_ControlIn => WB_Control_to_exmem,
+											  M_ControlIn => M_Control_to_exmem,
+											  ALU_Data_Input => ,
+											  WB_ControlOut => ,
+											  MEM_WrEn => ,
+											  Byte_ExtrEn => ,
+											  ALU_Data => );
+		
 	mem_stage : MEMSTAGE port map(CLK => CLK, 
-											Mem_WrEn => Mem_WrEn, 
-											ALU_MEM_Addr => alu_output, 
-											Byte_ExtrEn => Byte_ExtrEn,
-											MEM_DataIn => register_read_2, 
-											MEM_DataOut => mem_output_to_reg);
+											Mem_WrEn => , 
+											ALU_MEM_Addr => , 
+											Byte_ExtrEn => ,
+											MEM_DataIn => , 
+											MEM_DataOut => );
+											
+	mem_wb : MEMWB_Cluster port map(CLK => CLK,
+											  RST => RST,
+											  WB_ControlIn => ,
+											  Mem_Data_Input => ,
+											  ALU_Data_Input => ,
+											  Wr_DataSel => ,
+											  Mem_Data => ,
+											  ALU_Data => );
 										  
-	mem_data_register : Rgster port map(CLK => CLK, 
-													RST => RST, 
-													WE => MemDataRegEn, 
-													DataIN => mem_output_to_reg, 
-													DataOUT => mem_output);
 end Behavioral;
 

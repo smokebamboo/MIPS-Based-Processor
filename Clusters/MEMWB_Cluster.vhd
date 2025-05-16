@@ -35,7 +35,8 @@ entity MEMWB_Cluster is
 			  WB_ControlIn : in STD_LOGIC_VECTOR(31 downto 0);
 			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
-           Wr_DataSel : out  STD_LOGIC;
+           RF_Wr_DataSel : out  STD_LOGIC;
+			  RF_WrEn : out STD_LOGIC;
 			  Mem_Data : out STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0)
 			  );
@@ -71,7 +72,8 @@ begin
 												  DataIN => ALU_Data_Input, 
 												  DataOUT => ALU_Data);
 	
-	Wr_DataSel <= WB_ControlOut(0);
+	RF_Wr_DataSel <= WB_ControlOut(0);
+	RF_WrEn <= WB_ControlOut(1);
 	
 end Behavioral;
 
