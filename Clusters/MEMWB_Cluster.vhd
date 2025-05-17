@@ -35,10 +35,13 @@ entity MEMWB_Cluster is
 			  WB_ControlIn : in STD_LOGIC_VECTOR(31 downto 0);
 			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  
            RF_Wr_DataSel : out  STD_LOGIC;
 			  RF_WrEn : out STD_LOGIC;
 			  Mem_Data : out STD_LOGIC_VECTOR(31 downto 0);
-			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0)
+			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR(4 downto 0)
 			  );
 end MEMWB_Cluster;
 
@@ -50,6 +53,14 @@ architecture Behavioral of MEMWB_Cluster is
 				WE : in  STD_LOGIC;
 				DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
 				DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
+	end component;
+	
+	component Register_5bit is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+           WE : in  STD_LOGIC;
+           DataIN : in  STD_LOGIC_VECTOR (4 downto 0);
+           DataOUT : out  STD_LOGIC_VECTOR (4 downto 0));
 	end component;
 	
 	signal WB_ControlOut : STD_LOGIC_VECTOR (31 downto 0);
@@ -72,6 +83,12 @@ begin
 												  DataIN => ALU_Data_Input, 
 												  DataOUT => ALU_Data);
 	
+	destination_register : Register_5bit port map (CLK => CLK,
+																  RST => RST,
+																  WE => '1',
+																  DataIN => Write_Register_Input,
+																  DataOUT => Write_Register_Out);
+																  
 	RF_Wr_DataSel <= WB_ControlOut(0);
 	RF_WrEn <= WB_ControlOut(1);
 	

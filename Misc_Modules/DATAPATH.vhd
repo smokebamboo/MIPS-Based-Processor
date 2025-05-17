@@ -61,6 +61,7 @@ architecture Behavioral of DATAPATH is
             ALU_out : in  STD_LOGIC_VECTOR (31 downto 0);
             MEM_out : in  STD_LOGIC_VECTOR (31 downto 0);
             RF_WrData_sel : in  STD_LOGIC;
+				RF_Wr_Addr : in STD_LOGIC_VECTOR (4 downto 0);
           	RF_B_sel : in  STD_LOGIC;
 		   	Immed_sel : in STD_LOGIC_VECTOR (1 downto 0);
            	CLK : in  STD_LOGIC;
@@ -108,13 +109,15 @@ architecture Behavioral of DATAPATH is
 			  RF_A_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Immediate_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  M_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  ALU_Bin_Sel : out STD_LOGIC;
 			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
 			  RF_A_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
-			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0)
+			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
 			  );
 	end component;
 	
@@ -124,10 +127,14 @@ architecture Behavioral of DATAPATH is
 			  WB_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
 			  M_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
 			  ALU_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  MEM_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
-			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0)
+			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
 			  );
 	end component;
 	
@@ -137,13 +144,19 @@ architecture Behavioral of DATAPATH is
 			  WB_ControlIn : in STD_LOGIC_VECTOR(31 downto 0);
 			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
            RF_Wr_DataSel : out  STD_LOGIC;
 			  RF_WrEn : out STD_LOGIC;
 			  Mem_Data : out STD_LOGIC_VECTOR(31 downto 0);
-			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0)
+			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
 			  );
 	end component;
-
+	
+	signal dont_care_vector : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+	signal dont_care : STD_LOGIC := '0';
+	
+	signal InstrRegEn : STD_LOGIC;
 	signal instruction : STD_LOGIC_VECTOR (31 downto 0); -- The instruction from the ROM, forwarded to the decoding stage and the Control
 	
 	signal alu_zero_signal : STD_LOGIC;
@@ -153,41 +166,72 @@ architecture Behavioral of DATAPATH is
 	
 	signal WB_Control_to_exmem : STD_LOGIC_VECTOR (31 downto 0);
 	signal M_Control_to_exmem : STD_LOGIC_VECTOR (31 downto 0);
+	signal write_reg_to_exmem : STD_LOGIC_VECTOR (4 downto 0);
+	
+	signal WB_Control_to_memwb : STD_LOGIC_VECTOR (31 downto 0);
+	signal write_reg_to_memwb : STD_LOGIC_VECTOR (4 downto 0);
 	
 	signal ALU_Bin_sel : STD_LOGIC;
-	signal ALU_func : STD_LOGIC;
+	signal ALU_func : STD_LOGIC_VECTOR (3 downto 0);
+	signal immed_to_cluster : STD_LOGIC_VECTOR (31 downto 0);
+	signal rf_a_to_cluster : STD_LOGIC_VECTOR (31 downto 0);
+	signal rf_b_to_cluster : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal alu_out_to_exmem : STD_LOGIC_VECTOR (31 downto 0);
+	signal rf_a_to_exec : STD_LOGIC_VECTOR (31 downto 0);
+	signal rf_b_to_exec : STD_LOGIC_VECTOR (31 downto 0);
+	signal immed_to_exec : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal MEM_WrEn : STD_LOGIC;
+	signal Byte_ExtrEn : STD_LOGIC;
+	
+	signal alu_out : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal MEM_DataIn : STD_LOGIC_VECTOR (31 downto 0);
+	signal MEM_DataOut : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal RF_Wr_DataSel : STD_LOGIC;
+	signal RF_WrEn : STD_LOGIC;
+	
+	signal MEM_writeback : STD_LOGIC_VECTOR (31 downto 0);
+	signal ALU_writeback : STD_LOGIC_VECTOR (31 downto 0);
+	signal RF_Wr_Addr : STD_LOGIC_VECTOR (4 downto 0);
 	
 begin
 	pc_sel <= (Branch_Eq AND alu_zero_signal) OR 
 				 (Branch_not_Eq AND (NOT alu_zero_signal));
 
-	if_stage : IFSTAGE port map(PC_Immed => immediate, 
+	if_stage : IFSTAGE port map(PC_Immed => dont_care_vector, 
 										 PC_sel => pc_sel, 
 										 PC_LdEn => PC_LdEn, 
 									    RST => RST, 
 										 CLK => CLK, 
-										 Instr => instruction_to_reg);
+										 Instr => instruction_to_reg
+										 );
 
 	Instr <= instruction;
 	
 	instruction_register : Rgster port map(CLK => CLK, 
 														RST => RST, 
-														WE => InstrRegEn, 
+														WE => '1', 
 														DataIN => instruction_to_reg, 
-														DataOUT => instruction);
+														DataOUT => instruction
+														);
 	
 	dec_stage : DECSTAGE port map(Instr => instruction, 
-											RF_WrEn => , 
-											ALU_out => , 
-											MEM_out => , 
-											RF_WrData_sel => ,
-											RF_B_sel => RF_B_sel, 
+											RF_WrEn => RF_WrEn, 
+											ALU_out => ALU_writeback, 
+											MEM_out => MEM_writeback, 
+											RF_WrData_sel => RF_Wr_DataSel,
+											RF_B_sel => RF_B_sel,
+											RF_Wr_Addr => RF_Wr_Addr,
 											Immed_sel => Immed_sel, 
 											CLK => CLK, 
 											RST => RST, 
 											Immed => immed_to_cluster, 
 											RF_A => rf_a_to_cluster, 
-											RF_B => rf_b_to_cluster);
+											RF_B => rf_b_to_cluster
+											);
 											
 	id_ex : IDEX_Cluster port map(CLK => CLK,
 											RST => RST,
@@ -197,50 +241,62 @@ begin
 											RF_A_Data_Input => rf_a_to_cluster,
 											RF_B_Data_Input => rf_b_to_cluster,
 											Immediate_Data_Input => immed_to_cluster,
+											Write_Register_Input => instruction(20 downto 16),
 											WB_ControlOut => WB_Control_to_exmem,
 											M_ControlOut => M_Control_to_exmem,
 											ALU_Bin_Sel => ALU_Bin_Sel,
 											ALU_func => ALU_func,
-											RF_A_DataOut => ,
-											RF_B_DataOut => ,
-											Immediate_DataOut => 
+											RF_A_DataOut => rf_a_to_exec,
+											RF_B_DataOut => rf_b_to_exec,
+											Immediate_DataOut => immed_to_exec,
+											Write_Register_Out => write_reg_to_exmem
 											);
 	
-	alu_stage : ALUSTAGE port map(RF_A => , 
-											RF_B => , 
-											Immed => , 
+	alu_stage : ALUSTAGE port map(RF_A => rf_a_to_exec, 
+											RF_B => rf_b_to_exec, 
+											Immed => immed_to_exec, 
 											ALU_Bin_sel => ALU_Bin_Sel, 
 											ALU_func => ALU_func, 
-											ALU_out => ,
-											Zero => alu_zero_signal, 
-											Cout => Cout, 
-											Ovf => Ovf);
+											ALU_out => alu_out_to_exmem,
+											Zero => alu_zero_signal,
+											Cout => Cout,
+											Ovf => Ovf
+											);
 											
 	ex_mem : EXMEM_Cluster port map(CLK => CLK,
 											  RST => RST,
 											  WB_ControlIn => WB_Control_to_exmem,
 											  M_ControlIn => M_Control_to_exmem,
-											  ALU_Data_Input => ,
-											  WB_ControlOut => ,
-											  MEM_WrEn => ,
-											  Byte_ExtrEn => ,
-											  ALU_Data => );
+											  ALU_Data_Input => alu_out_to_exmem,
+											  RF_B_Data_Input => rf_b_to_exec,
+											  Write_Register_Input => write_reg_to_exmem,
+											  WB_ControlOut => WB_Control_to_memwb,
+											  MEM_WrEn => MEM_WrEn,
+											  Byte_ExtrEn => Byte_ExtrEn,
+											  ALU_Data => alu_out,
+											  RF_B_DataOut => MEM_Datain,
+											  Write_Register_Out => write_reg_to_memwb
+											  );
 		
 	mem_stage : MEMSTAGE port map(CLK => CLK, 
-											Mem_WrEn => , 
-											ALU_MEM_Addr => , 
-											Byte_ExtrEn => ,
-											MEM_DataIn => , 
-											MEM_DataOut => );
+											Mem_WrEn => MEM_WrEn,
+											ALU_MEM_Addr => alu_out,
+											Byte_ExtrEn => Byte_ExtrEn,
+											MEM_DataIn => MEM_DataIn, 
+											MEM_DataOut => MEM_DataOut
+											);
 											
 	mem_wb : MEMWB_Cluster port map(CLK => CLK,
 											  RST => RST,
-											  WB_ControlIn => ,
-											  Mem_Data_Input => ,
-											  ALU_Data_Input => ,
-											  Wr_DataSel => ,
-											  Mem_Data => ,
-											  ALU_Data => );
+											  WB_ControlIn => WB_Control_to_memwb,
+											  Mem_Data_Input => MEM_DataOut,
+											  ALU_Data_Input => alu_out,
+											  Write_Register_Input => write_reg_to_memwb,
+											  RF_Wr_DataSel => RF_Wr_DataSel,
+											  RF_WrEn => RF_WrEn,
+											  Mem_Data => MEM_writeback,
+											  ALU_Data => ALU_writeback,
+											  Write_Register_Out => RF_Wr_Addr
+											  );
 										  
 end Behavioral;
-

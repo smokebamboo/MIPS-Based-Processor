@@ -35,10 +35,12 @@ entity DECSTAGE is
            ALU_out : in  STD_LOGIC_VECTOR (31 downto 0);
            MEM_out : in  STD_LOGIC_VECTOR (31 downto 0);
            RF_WrData_sel : in  STD_LOGIC;
+			  RF_Wr_Addr : in STD_LOGIC_VECTOR (4 downto 0);
            RF_B_sel : in  STD_LOGIC;
 			  Immed_sel : in STD_LOGIC_VECTOR (1 downto 0);
            CLK : in  STD_LOGIC;
            RST : in  STD_LOGIC;
+			  
            Immed : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_B : out  STD_LOGIC_VECTOR (31 downto 0));
@@ -96,7 +98,8 @@ begin
 										 Ard1 => Instr(25 downto 21), 
 										 Ard2 => Ard2, 
 										 WrEn => RF_WrEn, 
-										 Awr => Instr(20 downto 16), 
+	--									 Awr => Instr(20 downto 16),
+										 Awr => RF_Wr_Addr,
 										 Din => Din, 
 										 Dout1 => RF_A, 
 										 Dout2 => RF_B);

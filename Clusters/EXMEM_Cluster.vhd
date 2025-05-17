@@ -35,10 +35,15 @@ entity EXMEM_Cluster is
 			  WB_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
 			  M_ControlIn : in STD_LOGIC_VECTOR (31 downto 0);
 			  ALU_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  MEM_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
-			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0)
+			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0);
+			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
 			  );
 end EXMEM_Cluster;
 
@@ -50,6 +55,14 @@ architecture Behavioral of EXMEM_Cluster is
 				WE : in  STD_LOGIC;
 				DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
 				DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
+	end component;
+	
+	component Register_5bit is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+           WE : in  STD_LOGIC;
+           DataIN : in  STD_LOGIC_VECTOR (4 downto 0);
+           DataOUT : out  STD_LOGIC_VECTOR (4 downto 0));
 	end component;
 	
 	signal M_ControlOut : STD_LOGIC_VECTOR (31 downto 0);
@@ -71,6 +84,18 @@ begin
 												  WE => '1', 
 												  DataIN => ALU_Data_Input, 
 												  DataOUT => ALU_Data);
+												  
+	rf_B_register : Rgster port map(CLK => CLK, 
+											  RST => RST, 
+											  WE => '1', 
+											  DataIN => RF_B_Data_Input, 
+											  DataOUT => RF_B_DataOut);
+											  
+	destination_register : Register_5bit port map (CLK => CLK,
+																  RST => RST,
+																  WE => '1',
+																  DataIN => Write_Register_Input,
+																  DataOUT => Write_Register_Out);
 	
 	MEM_WrEn <= M_ControlOut(0);
 	Byte_ExtrEn <= M_ControlOut(1);

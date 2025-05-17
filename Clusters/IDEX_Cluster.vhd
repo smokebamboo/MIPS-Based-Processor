@@ -38,13 +38,16 @@ entity IDEX_Cluster is
 			  RF_A_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Immediate_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  M_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  ALU_Bin_Sel : out STD_LOGIC;
 			  ALU_func : out STD_LOGIC_VECTOR (3 downto 0);
 			  RF_A_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
-			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0)
+			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
 			  );
 end IDEX_Cluster;
 
@@ -56,6 +59,14 @@ architecture Behavioral of IDEX_Cluster is
 				WE : in  STD_LOGIC;
 				DataIN : in  STD_LOGIC_VECTOR (31 downto 0);
 				DataOUT : out  STD_LOGIC_VECTOR (31 downto 0));
+	end component;
+	
+	component Register_5bit is
+    Port ( CLK : in  STD_LOGIC;
+           RST : in  STD_LOGIC;
+           WE : in  STD_LOGIC;
+           DataIN : in  STD_LOGIC_VECTOR (4 downto 0);
+           DataOUT : out  STD_LOGIC_VECTOR (4 downto 0));
 	end component;
 	
 	signal EX_ControlOut : STD_LOGIC_VECTOR (31 downto 0);
@@ -96,6 +107,12 @@ begin
 													 WE => '1', 
 													 DataIN => Immediate_Data_Input, 
 													 DataOUT => Immediate_DataOut);
+													 
+	destination_register : Register_5bit port map (CLK => CLK,
+																  RST => RST,
+																  WE => '1',
+																  DataIN => Write_Register_Input,
+																  DataOUT => Write_Register_Out);
 	
 	ALU_Bin_Sel <= EX_ControlOut(0);
 	ALU_func <= EX_ControlOut(4 downto 1);
