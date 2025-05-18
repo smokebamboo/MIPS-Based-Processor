@@ -38,9 +38,7 @@ end Single_CPU;
 
 architecture Behavioral of Single_CPU is
 	component ControlModule is
-    Port ( CLK : in STD_LOGIC;
-			  RST : in STD_LOGIC;
-			  Instr : in  STD_LOGIC_VECTOR (31 downto 0);
+    Port ( Instr : in  STD_LOGIC_VECTOR (31 downto 0);
 			  PC_LdEn : out STD_LOGIC;
 			  Immed_sel : out STD_LOGIC_VECTOR (1 downto 0);
 			  RF_WrEn : out STD_LOGIC;
@@ -77,13 +75,11 @@ architecture Behavioral of Single_CPU is
 	signal branch_eq_sig : STD_LOGIC; -- Signal for the beq and b operations
 	signal branch_not_eq_sig : STD_LOGIC; -- Signal for the bne operation
 	
-	signal EX_Control : STD_LOGIC_VECTOR (31 downto 0);
-	signal M_Control : STD_LOGIC_VECTOR (31 downto 0);
-	signal WB_Control : STD_LOGIC_VECTOR (31 downto 0);
+	signal EX_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+	signal M_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+	signal WB_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 begin
-	control : ControlModule port map(CLK => CLK,
-												RST => RST, 
-												Instr => instruction, 
+	control : ControlModule port map(Instr => instruction, 
 												PC_LdEn => pc_load_enable, 
 												Immed_sel => immediate_sel,
 												RF_WrEn => WB_Control(1), 
