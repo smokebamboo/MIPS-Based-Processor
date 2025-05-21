@@ -43,7 +43,10 @@ entity DECSTAGE is
 			  
            Immed : out  STD_LOGIC_VECTOR (31 downto 0);
            RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
-           RF_B : out  STD_LOGIC_VECTOR (31 downto 0));
+           RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
+			  RF_Wr_Data : out STD_LOGIC_VECTOR (31 downto 0);
+			  Read_A_Addr : out STD_LOGIC_VECTOR (4 downto 0);
+			  Read_B_Addr : out STD_LOGIC_VECTOR (4 downto 0));
 end DECSTAGE;
 
 architecture Behavioral of DECSTAGE is
@@ -80,6 +83,7 @@ architecture Behavioral of DECSTAGE is
            ImmedOut : out  STD_LOGIC_VECTOR (31 downto 0));
 	end component;
 	
+	signal Ard1 : STD_LOGIC_VECTOR (4 downto 0);
 	signal Ard2 : STD_LOGIC_VECTOR (4 downto 0);
 	signal Din : STD_LOGIC_VECTOR (31 downto 0);
 begin
@@ -92,10 +96,11 @@ begin
 													  In1 => MEM_out, 
 													  En => RF_WrData_sel, 
 													  Dout => Din);
+	Ard1 <= Instr(25 downto 21);
 	
 	RF : RegisterFile port map (CLK => CLK, 
 										 RST => RST, 
-										 Ard1 => Instr(25 downto 21), 
+										 Ard1 => Ard1,
 										 Ard2 => Ard2, 
 										 WrEn => RF_WrEn, 
 	--									 Awr => Instr(20 downto 16),
@@ -107,5 +112,9 @@ begin
 	Immediate_Handler : ImmedHandler port map (Sel => Immed_sel, 
 															 ImmedIn => Instr(15 downto 0), 
 															 ImmedOut => Immed);
+															 
+	Read_A_Addr <= Ard1;
+	Read_B_Addr <= Ard2;
+	RF_Wr_Data <= Din;
 end Behavioral;
 

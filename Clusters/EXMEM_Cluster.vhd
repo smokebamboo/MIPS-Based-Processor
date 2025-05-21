@@ -37,6 +37,8 @@ entity EXMEM_Cluster is
 			  ALU_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  --Read_Register_A_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Input : in STD_LOGIC_VECTOR(4 downto 0);
 			  
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  MEM_WrEn : out STD_LOGIC;
@@ -44,6 +46,8 @@ entity EXMEM_Cluster is
 			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
+			  --Read_Register_A_Out : out STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Out : out STD_LOGIC_VECTOR(4 downto 0)
 			  );
 end EXMEM_Cluster;
 
@@ -96,6 +100,18 @@ begin
 																  WE => '1',
 																  DataIN => Write_Register_Input,
 																  DataOUT => Write_Register_Out);
+																  
+	--read_A_register : Register_5bit port map (CLK => CLK,
+	--															  RST => RST,
+	--															  WE => '1',
+	--															  DataIN => Read_Register_B_Input,
+	--															  DataOUT => Read_Register_A_Out);
+																  
+	--read_B_register : Register_5bit port map (CLK => CLK,
+	--															  RST => RST,
+	--															  WE => '1',
+	--															  DataIN => Read_Register_B_Input,
+	--															  DataOUT => Read_Register_A_Out);
 	
 	MEM_WrEn <= M_ControlOut(0);
 	Byte_ExtrEn <= M_ControlOut(1);

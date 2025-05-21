@@ -36,6 +36,8 @@ entity MEMWB_Cluster is
 			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
 			  Write_Register_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_A_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Input : in STD_LOGIC_VECTOR(4 downto 0);
 			  
            RF_Wr_DataSel : out  STD_LOGIC;
 			  RF_WrEn : out STD_LOGIC;
@@ -88,6 +90,18 @@ begin
 																  WE => '1',
 																  DataIN => Write_Register_Input,
 																  DataOUT => Write_Register_Out);
+																  
+	--read_A_register : Register_5bit port map (CLK => CLK,
+	--															  RST => RST,
+	--															  WE => '1',
+	--															  DataIN => Read_Register_B_Input,
+	--															  DataOUT => Read_Register_A_Out);
+																  
+	--read_B_register : Register_5bit port map (CLK => CLK,
+	--															  RST => RST,
+	--															  WE => '1',
+	--															  DataIN => Read_Register_B_Input,
+	--															  DataOUT => Read_Register_A_Out);
 																  
 	RF_Wr_DataSel <= WB_ControlOut(0);
 	RF_WrEn <= WB_ControlOut(1);

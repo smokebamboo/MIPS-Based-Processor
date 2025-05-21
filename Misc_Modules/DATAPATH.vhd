@@ -32,7 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity DATAPATH is
 	 Port ( Instr : out  STD_LOGIC_VECTOR (31 downto 0);
 			  Ovf : out STD_LOGIC;
-			  Cout : out STD_LOGIC;
+			  Cout : out STD_LOGIC;			  
+			  rf_a_addr : out STD_LOGIC_VECTOR (4 downto 0);
+			  rf_b_addr : out STD_LOGIC_VECTOR (4 downto 0);
+			  exmem_wraddr : out STD_LOGIC_VECTOR (4 downto 0);
+			  memwb_wraddr : out STD_LOGIC_VECTOR (4 downto 0);
+			  hazard_select : in STD_LOGIC_VECTOR (3 downto 0);
 			  CLK : in STD_LOGIC;
 			  RST : in STD_LOGIC;
 			  PC_LdEn : in STD_LOGIC;
@@ -68,7 +73,10 @@ architecture Behavioral of DATAPATH is
            	RST : in  STD_LOGIC;
            	Immed : out  STD_LOGIC_VECTOR (31 downto 0);
            	RF_A : out  STD_LOGIC_VECTOR (31 downto 0);
-           	RF_B : out  STD_LOGIC_VECTOR (31 downto 0));
+           	RF_B : out  STD_LOGIC_VECTOR (31 downto 0);
+				RF_Wr_Data : out STD_LOGIC_VECTOR (31 downto 0);
+				Read_A_Addr : out STD_LOGIC_VECTOR (4 downto 0);
+				Read_B_Addr : out STD_LOGIC_VECTOR (4 downto 0));
 	end component;
 	
 	component ALUSTAGE is
@@ -110,6 +118,8 @@ architecture Behavioral of DATAPATH is
 			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Immediate_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  Read_Register_A_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  Read_Register_B_Input : in STD_LOGIC_VECTOR(4 downto 0);
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  M_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  ALU_Bin_Sel : out STD_LOGIC;
@@ -117,7 +127,9 @@ architecture Behavioral of DATAPATH is
 			  RF_A_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  Immediate_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
-			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
+			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0);
+			  Read_Register_A_Out : out STD_LOGIC_VECTOR(4 downto 0);
+			  Read_Register_B_Out : out STD_LOGIC_VECTOR(4 downto 0)
 			  );
 	end component;
 	
@@ -129,12 +141,16 @@ architecture Behavioral of DATAPATH is
 			  ALU_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_Data_Input : in STD_LOGIC_VECTOR (31 downto 0);
 			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  --Read_Register_A_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Input : in STD_LOGIC_VECTOR(4 downto 0);
 			  WB_ControlOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  MEM_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
 			  ALU_Data : out STD_LOGIC_VECTOR (31 downto 0);
 			  RF_B_DataOut : out STD_LOGIC_VECTOR (31 downto 0);
 			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
+			  --Read_Register_A_Out : out STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Out : out STD_LOGIC_VECTOR(4 downto 0)
 			  );
 	end component;
 	
@@ -145,12 +161,24 @@ architecture Behavioral of DATAPATH is
 			  Mem_Data_Input : in STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data_input : in STD_LOGIC_VECTOR(31 downto 0);
 			  Write_Register_Input : in STD_LOGIC_VECTOR (4 downto 0);
+			  --Read_Register_A_Input : in STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Input : in STD_LOGIC_VECTOR(4 downto 0);
            RF_Wr_DataSel : out  STD_LOGIC;
 			  RF_WrEn : out STD_LOGIC;
 			  Mem_Data : out STD_LOGIC_VECTOR(31 downto 0);
 			  ALU_Data : out STD_LOGIC_VECTOR(31 downto 0);
 			  Write_Register_Out : out STD_LOGIC_VECTOR (4 downto 0)
+			  --Read_Register_A_Out : out STD_LOGIC_VECTOR(4 downto 0);
+			  --Read_Register_B_Out : out STD_LOGIC_VECTOR(4 downto 0)
 			  );
+	end component;
+	
+	component MUX_3_to_1_32bit is
+    Port ( In0 : in STD_LOGIC_VECTOR (31 downto 0);
+           In1 : in STD_LOGIC_VECTOR (31 downto 0);
+			  In2 : in STD_LOGIC_VECTOR (31 downto 0);
+           Sel : in STD_LOGIC_VECTOR (1 downto 0);
+           Dout : out STD_LOGIC_VECTOR (31 downto 0));
 	end component;
 	
 	signal dont_care_vector : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
@@ -197,6 +225,17 @@ architecture Behavioral of DATAPATH is
 	signal ALU_writeback : STD_LOGIC_VECTOR (31 downto 0);
 	signal RF_Wr_Addr : STD_LOGIC_VECTOR (4 downto 0);
 	
+	signal RF_Wr_Data : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal rf_a_to_alu : STD_LOGIC_VECTOR (31 downto 0);
+	signal rf_b_to_alu : STD_LOGIC_VECTOR (31 downto 0);
+	
+	signal Read_A_Addr_to_idex : STD_LOGIC_VECTOR (4 downto 0);
+	signal Read_B_Addr_to_idex : STD_LOGIC_VECTOR (4 downto 0);
+	
+	signal Read_A_Addr_Out : STD_LOGIC_VECTOR (4 downto 0);
+	signal Read_B_Addr_Out : STD_LOGIC_VECTOR (4 downto 0);
+	
 begin
 	pc_sel <= (Branch_Eq AND alu_zero_signal) OR 
 				 (Branch_not_Eq AND (NOT alu_zero_signal));
@@ -230,7 +269,10 @@ begin
 											RST => RST, 
 											Immed => immed_to_cluster, 
 											RF_A => rf_a_to_cluster, 
-											RF_B => rf_b_to_cluster
+											RF_B => rf_b_to_cluster,
+											RF_Wr_Data => RF_Wr_Data,
+											Read_A_Addr => Read_A_Addr_to_idex,
+											Read_B_Addr => Read_B_Addr_to_idex
 											);
 											
 	id_ex : IDEX_Cluster port map(CLK => CLK,
@@ -242,6 +284,8 @@ begin
 											RF_B_Data_Input => rf_b_to_cluster,
 											Immediate_Data_Input => immed_to_cluster,
 											Write_Register_Input => instruction(20 downto 16),
+											Read_Register_A_Input => Read_A_Addr_to_idex,
+											Read_Register_B_Input => Read_B_Addr_to_idex,
 											WB_ControlOut => WB_Control_to_exmem,
 											M_ControlOut => M_Control_to_exmem,
 											ALU_Bin_Sel => ALU_Bin_Sel,
@@ -249,11 +293,27 @@ begin
 											RF_A_DataOut => rf_a_to_exec,
 											RF_B_DataOut => rf_b_to_exec,
 											Immediate_DataOut => immed_to_exec,
-											Write_Register_Out => write_reg_to_exmem
+											Write_Register_Out => write_reg_to_exmem,
+											Read_Register_A_Out => rf_a_addr,
+											Read_Register_B_Out => rf_b_addr
 											);
+											
+	rf_a_mux : MUX_3_to_1_32bit port map(In0 => rf_a_to_exec,
+													 In1 => alu_out,
+													 In2 => RF_Wr_Data,
+													 Sel => hazard_select(1 downto 0),
+													 Dout => rf_a_to_alu
+													 );
+													 
+	rf_b_mux : MUX_3_to_1_32bit port map(In0 => rf_b_to_exec,
+													 In1 => alu_out,
+													 In2 => RF_Wr_Data,
+													 Sel => hazard_select(3 downto 2),
+													 Dout => rf_b_to_alu
+													 );
 	
-	alu_stage : ALUSTAGE port map(RF_A => rf_a_to_exec, 
-											RF_B => rf_b_to_exec, 
+	alu_stage : ALUSTAGE port map(RF_A => rf_a_to_alu, 
+											RF_B => rf_b_to_alu, 
 											Immed => immed_to_exec, 
 											ALU_Bin_sel => ALU_Bin_Sel, 
 											ALU_func => ALU_func, 
@@ -268,15 +328,21 @@ begin
 											  WB_ControlIn => WB_Control_to_exmem,
 											  M_ControlIn => M_Control_to_exmem,
 											  ALU_Data_Input => alu_out_to_exmem,
-											  RF_B_Data_Input => rf_b_to_exec,
+											  RF_B_Data_Input => rf_b_to_alu,
 											  Write_Register_Input => write_reg_to_exmem,
+											  --Read_Register_A_Input =>
+											  --Read_Register_B_Input =>
 											  WB_ControlOut => WB_Control_to_memwb,
 											  MEM_WrEn => MEM_WrEn,
 											  Byte_ExtrEn => Byte_ExtrEn,
 											  ALU_Data => alu_out,
 											  RF_B_DataOut => MEM_Datain,
 											  Write_Register_Out => write_reg_to_memwb
+											  --Read_Register_A_Out =>
+											  --Read_Register_B_Out =>
 											  );
+											  
+	exmem_wraddr <= write_reg_to_memwb;
 		
 	mem_stage : MEMSTAGE port map(CLK => CLK, 
 											Mem_WrEn => MEM_WrEn,
@@ -292,11 +358,17 @@ begin
 											  Mem_Data_Input => MEM_DataOut,
 											  ALU_Data_Input => alu_out,
 											  Write_Register_Input => write_reg_to_memwb,
+											  --Read_Register_A_Input =>
+											  --Read_Register_B_Input =>
 											  RF_Wr_DataSel => RF_Wr_DataSel,
 											  RF_WrEn => RF_WrEn,
 											  Mem_Data => MEM_writeback,
 											  ALU_Data => ALU_writeback,
 											  Write_Register_Out => RF_Wr_Addr
+											  --Read_Register_A_Out =>
+											  --Read_Register_B_Out =>
 											  );
+											  
+	memwb_wraddr <= RF_Wr_Addr;
 										  
 end Behavioral;

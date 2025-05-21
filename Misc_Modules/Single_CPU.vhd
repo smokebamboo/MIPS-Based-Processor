@@ -56,6 +56,11 @@ architecture Behavioral of Single_CPU is
 	 Port ( Instr : out  STD_LOGIC_VECTOR (31 downto 0);
 			  Ovf : out STD_LOGIC;
 			  Cout : out STD_LOGIC;
+			  rf_a_addr : out  STD_LOGIC_VECTOR (4 downto 0);
+			  rf_b_addr : out  STD_LOGIC_VECTOR (4 downto 0);
+			  exmem_wraddr : out  STD_LOGIC_VECTOR (4 downto 0);
+			  memwb_wraddr : out  STD_LOGIC_VECTOR (4 downto 0);
+			  hazard_select : in STD_LOGIC_VECTOR (3 downto 0);
 			  CLK : in STD_LOGIC;
 			  RST : in STD_LOGIC;
 			  PC_LdEn : in STD_LOGIC;
@@ -68,6 +73,14 @@ architecture Behavioral of Single_CPU is
 			  WB_Control : in STD_LOGIC_VECTOR (31 downto 0));
 	end component;
 	
+	component Hazard_Unit is
+	Port(rf_a : in STD_LOGIC_VECTOR (4 downto 0);
+		  rf_b : in STD_LOGIC_VECTOR (4 downto 0);
+		  exmem_wraddr : in STD_LOGIC_VECTOR (4 downto 0) := (others => '0');
+		  memwb_wraddr : in STD_LOGIC_VECTOR (4 downto 0);
+		  sel : out STD_LOGIC_VECTOR (3 downto 0));
+	end component;
+	
 	signal instruction : STD_LOGIC_VECTOR (31 downto 0); -- The current instruction
 	signal pc_load_enable : STD_LOGIC; -- Whether the program advances or is stalled
 	signal immediate_sel : STD_LOGIC_VECTOR (1 downto 0); -- Selects the format of the Immediate for instructions
@@ -78,6 +91,15 @@ architecture Behavioral of Single_CPU is
 	signal EX_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 	signal M_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
 	signal WB_Control : STD_LOGIC_VECTOR (31 downto 0) := (others => '0');
+	
+	signal rf_a_addr : STD_LOGIC_VECTOR (4 downto 0);
+	signal rf_b_addr : STD_LOGIC_VECTOR (4 downto 0);
+	
+	signal exmem_wraddr : STD_LOGIC_VECTOR (4 downto 0);
+	signal memwb_wraddr : STD_LOGIC_VECTOR (4 downto 0);
+	
+	signal hazard_select : STD_LOGIC_VECTOR (3 downto 0);
+
 begin
 	control : ControlModule port map(Instr => instruction, 
 												PC_LdEn => pc_load_enable, 
@@ -95,7 +117,12 @@ begin
 	
 	path : DATAPATH port map(Instr => instruction, 
 									 Ovf => Ovf, 
-									 Cout => Cout, 
+									 Cout => Cout,
+									 rf_a_addr => rf_a_addr,
+									 rf_b_addr => rf_b_addr,
+									 exmem_wraddr => exmem_wraddr,
+									 memwb_wraddr => memwb_wraddr,
+									 hazard_select => hazard_select,
 									 CLK => CLK, 
 									 RST => RST, 
 									 PC_LdEn => pc_load_enable, 
@@ -107,5 +134,12 @@ begin
 									 M_Control => M_Control,
 									 WB_Control => WB_Control
 									 );
+									 
+	hazardunit : Hazard_Unit port map(rf_a => rf_a_addr,
+												 rf_b => rf_b_addr,
+												 exmem_wraddr => exmem_wraddr,
+												 memwb_wraddr => memwb_wraddr,
+												 sel => hazard_select
+												 );
 end Behavioral;
 
