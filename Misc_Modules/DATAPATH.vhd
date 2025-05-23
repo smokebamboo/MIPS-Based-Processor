@@ -35,8 +35,13 @@ entity DATAPATH is
 			  Cout : out STD_LOGIC;			  
 			  rf_a_addr : out STD_LOGIC_VECTOR (4 downto 0);
 			  rf_b_addr : out STD_LOGIC_VECTOR (4 downto 0);
+			  rf_a_addr_to_stall : out STD_LOGIC_VECTOR (4 downto 0);
+			  rf_b_addr_to_stall : out STD_LOGIC_VECTOR (4 downto 0);
 			  exmem_wraddr : out STD_LOGIC_VECTOR (4 downto 0);
 			  memwb_wraddr : out STD_LOGIC_VECTOR (4 downto 0);
+			  idex_wraddr : out STD_LOGIC_VECTOR (4 downto 0);
+			  idex_mem_read : out STD_LOGIC;
+			  
 			  hazard_select : in STD_LOGIC_VECTOR (3 downto 0);
 			  CLK : in STD_LOGIC;
 			  RST : in STD_LOGIC;
@@ -47,7 +52,8 @@ entity DATAPATH is
 			  Branch_not_Eq : in STD_LOGIC;
 			  EX_Control : in STD_LOGIC_VECTOR (31 downto 0);
 			  M_Control : in STD_LOGIC_VECTOR (31 downto 0);
-			  WB_Control : in STD_LOGIC_VECTOR (31 downto 0));
+			  WB_Control : in STD_LOGIC_VECTOR (31 downto 0);
+			  ifid_en : in STD_LOGIC);
 end DATAPATH;
 
 architecture Behavioral of DATAPATH is
@@ -252,7 +258,7 @@ begin
 	
 	instruction_register : Rgster port map(CLK => CLK, 
 														RST => RST, 
-														WE => '1', 
+														WE => ifid_en, 
 														DataIN => instruction_to_reg, 
 														DataOUT => instruction
 														);
@@ -274,6 +280,9 @@ begin
 											Read_A_Addr => Read_A_Addr_to_idex,
 											Read_B_Addr => Read_B_Addr_to_idex
 											);
+											
+	rf_a_addr_to_stall <= Read_A_Addr_to_idex;
+	rf_b_addr_to_stall <= Read_B_Addr_to_idex;
 											
 	id_ex : IDEX_Cluster port map(CLK => CLK,
 											RST => RST,
@@ -297,7 +306,10 @@ begin
 											Read_Register_A_Out => rf_a_addr,
 											Read_Register_B_Out => rf_b_addr
 											);
-											
+	
+	idex_mem_read <= M_Control_to_exmem(2);
+	idex_wraddr <= write_reg_to_exmem;
+	
 	rf_a_mux : MUX_3_to_1_32bit port map(In0 => rf_a_to_exec,
 													 In1 => alu_out,
 													 In2 => RF_Wr_Data,

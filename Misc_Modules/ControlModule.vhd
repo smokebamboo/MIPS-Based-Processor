@@ -22,7 +22,8 @@ entity ControlModule is
 			  Mem_WrEn : out STD_LOGIC;
 			  Byte_ExtrEn : out STD_LOGIC;
 			  Branch_Eq : out STD_LOGIC;
-			  Branch_not_Eq : out STD_LOGIC);
+			  Branch_not_Eq : out STD_LOGIC;
+			  MEM_Read : out STD_LOGIC);
 end ControlModule;
 
 architecture Behavioral of ControlModule is
@@ -140,5 +141,9 @@ begin
 
 	Branch_not_Eq <= '1' when (control_state = bne_op) else
 						  '0';
+						  
+	MEM_Read <= '1' when control_state = lw_op OR
+								control_state = lb_op else
+					'0';
 
 end Behavioral;

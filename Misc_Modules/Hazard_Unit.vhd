@@ -34,13 +34,21 @@ entity Hazard_Unit is
 		  rf_b : in STD_LOGIC_VECTOR (4 downto 0);
 		  exmem_wraddr : in STD_LOGIC_VECTOR (4 downto 0);
 		  memwb_wraddr : in STD_LOGIC_VECTOR (4 downto 0);
-	
-		  sel : out STD_LOGIC_VECTOR (3 downto 0));
+		  idex_wraddr : in STD_LOGIC_VECTOR (4 downto 0);
+		  rf_a_addr_to_stall : in STD_LOGIC_VECTOR (4 downto 0);
+		  rf_b_addr_to_stall : in STD_LOGIC_VECTOR (4 downto 0);
+		  idex_mem_read : in STD_LOGIC;		  
+		
+		  sel : out STD_LOGIC_VECTOR (3 downto 0);
+		  pc_en : out STD_LOGIC;
+		  ifid_en : out STD_LOGIC;
+		  control_mux_en : out STD_LOGIC);
 end Hazard_Unit;
 
 architecture Behavioral of Hazard_Unit is
 
 begin
+
 	process(rf_a, rf_b, exmem_wraddr, memwb_wraddr)
 	begin
 		if (exmem_wraddr /= "00000") 
@@ -75,6 +83,25 @@ begin
 		
 		end if;
 	end process;
-
+	
+	process(idex_mem_read, idex_wraddr, idex_wraddr, rf_a_addr_to_stall, rf_a_addr_to_stall)
+	begin
+		if (idex_mem_read = '1' AND
+			 idex_wraddr /= "00000" AND
+			 (idex_wraddr = rf_a_addr_to_stall OR
+			 idex_wraddr = rf_b_addr_to_stall)) then
+			 
+			pc_en <= '0';
+			ifid_en <= '0';
+			control_mux_en <= '1';
+			
+		else
+			pc_en <= '1';
+			ifid_en <= '1';
+			control_mux_en <= '0';
+			
+		end if;
+	end process;
+	
 end Behavioral;
 
