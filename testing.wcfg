@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="/home/vlassisioa/Random Stuff/Comp Organization and Design/Lab3/Lab3/CPU_Test_isim_beh.wdb" id="1" type="auto">
+         <top_modules>
+            <top_module name="cpu_test" />
+            <top_module name="numeric_std" />
+            <top_module name="std_logic_1164" />
+            <top_module name="std_logic_arith" />
+            <top_module name="std_logic_unsigned" />
+            <top_module name="textio" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <WVObjectSize size="51" />
+   <wvobject fp_name="/cpu_test/clk" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/rst" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/ovf" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">ovf</obj_property>
+      <obj_property name="ObjectShortName">ovf</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/cout" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">cout</obj_property>
+      <obj_property name="ObjectShortName">cout</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/clk_period" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">clk_period</obj_property>
+      <obj_property name="ObjectShortName">clk_period</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/instruction" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">instruction[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instruction[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/control/control_state" type="other" db_ref_id="1">
+      <obj_property name="ElementShortName">control_state</obj_property>
+      <obj_property name="ObjectShortName">control_state</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_a" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_a[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_a[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_b" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_b[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_b[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/immed" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">immed[31:0]</obj_property>
+      <obj_property name="ObjectShortName">immed[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider45" type="divider">
+      <obj_property name="label">ALU</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/rf_a" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_a[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_a[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/rf_b" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_b[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_b[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/immed" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">immed[31:0]</obj_property>
+      <obj_property name="ObjectShortName">immed[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/alu_bin_sel" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_bin_sel</obj_property>
+      <obj_property name="ObjectShortName">alu_bin_sel</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/alu_func" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_func[3:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_func[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/alu_stage/alu_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_out[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider46" type="divider">
+      <obj_property name="label">WRITEBACK</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_wr_addr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_wr_addr[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_wr_addr[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_wrdata_sel" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_wrdata_sel</obj_property>
+      <obj_property name="ObjectShortName">rf_wrdata_sel</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_wren" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_wren</obj_property>
+      <obj_property name="ObjectShortName">rf_wren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/alu_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_out[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/mem_out" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_out[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_out[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/rf_wr_data" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_wr_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_wr_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider47" type="divider">
+      <obj_property name="label">MEMORY</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/mem_stage/mem_wren" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_wren</obj_property>
+      <obj_property name="ObjectShortName">mem_wren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/mem_stage/byte_extren" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">byte_extren</obj_property>
+      <obj_property name="ObjectShortName">byte_extren</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/mem_stage/alu_mem_addr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">alu_mem_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_mem_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/mem_stage/mem_datain" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_datain[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_datain[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/mem_stage/mem_dataout" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_dataout[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_dataout[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider48" type="divider">
+      <obj_property name="label">HAZARD UNIT</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/idex_mem_read" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">idex_mem_read</obj_property>
+      <obj_property name="ObjectShortName">idex_mem_read</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/pc_en" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">pc_en</obj_property>
+      <obj_property name="ObjectShortName">pc_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/ifid_en" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">ifid_en</obj_property>
+      <obj_property name="ObjectShortName">ifid_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/control_mux_en" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">control_mux_en</obj_property>
+      <obj_property name="ObjectShortName">control_mux_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/sel" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">sel[3:0]</obj_property>
+      <obj_property name="ObjectShortName">sel[3:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/rf_a" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_a[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_a[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/rf_b" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_b[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_b[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/exmem_wraddr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">exmem_wraddr[4:0]</obj_property>
+      <obj_property name="ObjectShortName">exmem_wraddr[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/memwb_wraddr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">memwb_wraddr[4:0]</obj_property>
+      <obj_property name="ObjectShortName">memwb_wraddr[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/idex_wraddr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">idex_wraddr[4:0]</obj_property>
+      <obj_property name="ObjectShortName">idex_wraddr[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/rf_a_addr_to_stall" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_a_addr_to_stall[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_a_addr_to_stall[4:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/hazardunit/rf_b_addr_to_stall" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">rf_b_addr_to_stall[4:0]</obj_property>
+      <obj_property name="ObjectShortName">rf_b_addr_to_stall[4:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider49" type="divider">
+      <obj_property name="label">ID/EX</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/id_ex/read_A_register/dataout" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">dataout[4:0]</obj_property>
+      <obj_property name="ObjectShortName">dataout[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/id_ex/read_B_register/dataout" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">dataout[4:0]</obj_property>
+      <obj_property name="ObjectShortName">dataout[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="divider50" type="divider">
+      <obj_property name="label">RF</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">128 128 255</obj_property>
+      <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/ard1" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ard1[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ard1[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/dec_stage/ard2" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ard2[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ard2[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/read_a_addr_to_idex" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">read_a_addr_to_idex[4:0]</obj_property>
+      <obj_property name="ObjectShortName">read_a_addr_to_idex[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/cpu_test/uut/path/read_b_addr_to_idex" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">read_b_addr_to_idex[4:0]</obj_property>
+      <obj_property name="ObjectShortName">read_b_addr_to_idex[4:0]</obj_property>
+   </wvobject>
+</wave_config>
